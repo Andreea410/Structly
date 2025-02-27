@@ -1,5 +1,4 @@
 # MPP
---
 # Entity: Data Structure
 ### **Attributes**
   - Complexitati
