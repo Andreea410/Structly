@@ -1,6 +1,6 @@
 # MPP
-Entity: Data Structure
-'''Attributes:
+#Entity: Data Structure
+**Attributes**:
 -Complexitati
 -Methods
 -Most Frequently asked interview questions about this data structure
