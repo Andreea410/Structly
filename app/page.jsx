@@ -1,9 +1,49 @@
-"use client";
+"use client"; // Ensure it's a client component
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   const router = useRouter();
+  const [dataStructures, setDataStructures] = useState([]);
+
+  useEffect(() => {
+    const isVisited = sessionStorage.getItem("visited");
+    const storedItems = sessionStorage.getItem("dataStructures");
+
+    if (!isVisited) {
+      console.log("First visit or page refresh detected. Clearing session storage.");
+      sessionStorage.removeItem("dataStructures");
+      setDataStructures([]);
+      sessionStorage.setItem("visited", "true");
+    } else if (storedItems) {
+      console.log("Loading stored data structures...");
+      setDataStructures(JSON.parse(storedItems));
+    }
+
+    const loadData = () => {
+      const updatedData = sessionStorage.getItem("dataStructures");
+      if (updatedData) {
+        setDataStructures(JSON.parse(updatedData));
+      }
+    };
+
+    window.addEventListener("storage", loadData);
+    return () => window.removeEventListener("storage", loadData);
+  }, []);
+
+  const handleDelete = (index) => {
+    const updatedList = [...dataStructures];
+    updatedList.splice(index, 1); 
+    setDataStructures(updatedList);
+    sessionStorage.setItem("dataStructures", JSON.stringify(updatedList));
+  };
+
+  const handleViewPage = (index) => {
+    router.push(`/data-structure/${index}`); // Navigate to details page
+  };
+
+  
 
   return (
     <div className="flex h-screen bg-purple-200">
@@ -26,27 +66,42 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 p-8">
-        {/* Search Bar */}
-        <div className="flex items-center justify-between">
-          <input
-            type="text"
-            placeholder="Search Data Structure by Name"
-            className="w-96 p-3 rounded-xl bg-white shadow-md focus:outline-none"
-          />
-          <div className="flex items-center gap-3">
-            <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">
-              You have 12 new action items!
-            </span>
-            <span className="bg-white p-3 rounded-full shadow-md">🔔</span>
-            <span className="bg-white p-3 rounded-full shadow-md">⚪</span>
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold mb-4">Data Structures</h2>
 
-        {/* Data Structure List */}
-        <div className="mt-8 space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <DataStructureCard key={i} />
-          ))}
+        {/* Display added data structures */}
+        <div className="space-y-4">
+          {dataStructures.length === 0 ? (
+            <p className="text-gray-600">No data structures added yet.</p>
+          ) : (
+            dataStructures.map((item, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-700">{item.title}</h3>
+                  <p className="text-gray-500 text-sm">{item.description}</p>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex space-x-2">
+                  {/* View Page Button */}
+                  <button
+                    onClick={() => handleViewPage(index)}
+                    style={{ backgroundColor: "green", color: "white", padding: "5px 10px" }}
+                  >
+                    View
+                  </button>
+
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDelete(index)}
+                    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Add Data Structure Button */}
@@ -63,28 +118,15 @@ export default function HomePage() {
   );
 }
 
-// Sidebar Navigation Item
 function NavItem({ text, active }) {
   return (
-    <div className={`flex items-center space-x-3 ${active ? "text-purple-600 font-bold" : "text-gray-700"} cursor-pointer`}>
+    <div
+      className={`flex items-center space-x-3 ${
+        active ? "text-purple-600 font-bold" : "text-gray-700"
+      } cursor-pointer`}
+    >
       <span>•</span>
       <span>{text}</span>
-    </div>
-  );
-}
-
-// Data Structure Card
-function DataStructureCard() {
-  return (
-    <div className="flex items-center bg-white p-4 rounded-lg shadow-md">
-      <img src="https://i.ytimg.com/vi/Qmt0QwzEmh0/maxresdefault.jpg" width={250} height={250} alt="Thumbnail" className="rounded-lg" />
-      <div className="ml-4">
-        <h3 className="text-lg font-bold text-gray-700">Data Structure</h3>
-        <p className="text-gray-500 text-sm">content content content content content content content</p>
-      </div>
-      <button className="ml-auto bg-purple-500 text-white px-4 py-2 rounded-full text-sm hover:bg-purple-700">
-        Show more
-      </button>
     </div>
   );
 }
