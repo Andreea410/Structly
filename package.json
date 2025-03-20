@@ -1,0 +1,36 @@
+{
+  "name": "structly",
+  "version": "1.0.0",
+  "description": "- Complexitati\r   - Methods\r   - Most Frequently asked interview questions about this data structure\r   - Algorithms that use this data structure\r   - LeetCode guide for understanding this data structure better and its use.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andreea410/Structly.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Andreea410/Structly/issues"
+  },
+  "homepage": "https://github.com/Andreea410/Structly#readme",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.0.14",
+    "daisyui": "^5.0.6",
+    "next": "^15.2.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.14"
+  }
+}
