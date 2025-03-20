@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FiSearch } from "react-icons/fi"; // Search icon
 
 export default function HomePage() {
   const router = useRouter();
   const [dataStructures, setDataStructures] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // 🔹 Search state
 
   useEffect(() => {
     const isVisited = sessionStorage.getItem("visited");
@@ -32,18 +34,23 @@ export default function HomePage() {
     return () => window.removeEventListener("storage", loadData);
   }, []);
 
+  // 🔹 Filter data structures based on search query
+  const filteredDataStructures = dataStructures.filter((ds) =>
+    ds.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // 🔹 Handle Delete Data Structure
   const handleDelete = (index) => {
     const updatedList = [...dataStructures];
-    updatedList.splice(index, 1); 
+    updatedList.splice(index, 1); // Remove selected item
     setDataStructures(updatedList);
     sessionStorage.setItem("dataStructures", JSON.stringify(updatedList));
   };
 
+  // 🔹 Handle View Page Navigation
   const handleViewPage = (index) => {
-    router.push(`/data-structure/${index}`); // Navigate to details page
+    router.push(`/data-structure/${index}`); 
   };
-
-  
 
   return (
     <div className="flex h-screen bg-purple-200">
@@ -66,39 +73,59 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 p-8">
+        {/* 🔹 Enhanced Search Bar */}
+        <div className="relative flex items-center mb-6 w-full max-w-3xl">
+        {/* Search Icon Inside Input */}
+          <FiSearch className="absolute left-4 text-gray-500" size={22} />
+  
+          <input
+            type="text"
+            placeholder="🔎 Search Data Structures..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full py-3 pl-12 pr-4 text-lg bg-white rounded-full shadow-lg border border-gray-300 
+               focus:ring-2 focus:ring-purple-500 focus:outline-none transition-all placeholder-gray-500"
+            />
+        </div>
+
+
         <h2 className="text-2xl font-bold mb-4">Data Structures</h2>
 
-        {/* Display added data structures */}
+        {/* Display filtered data structures */}
         <div className="space-y-4">
-          {dataStructures.length === 0 ? (
-            <p className="text-gray-600">No data structures added yet.</p>
+          {filteredDataStructures.length === 0 ? (
+            <p className="text-gray-600">No matching data structures found.</p>
           ) : (
-            dataStructures.map((item, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
+            filteredDataStructures.map((item, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
+              >
                 <div>
                   <h3 className="text-lg font-bold text-gray-700">{item.title}</h3>
                   <p className="text-gray-500 text-sm">{item.description}</p>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex space-x-2">
-                  {/* View Page Button */}
-                  <button
-                    onClick={() => handleViewPage(index)}
-                    style={{ backgroundColor: "green", color: "white", padding: "5px 10px" }}
-                  >
-                    View
-                  </button>
+                {/* Buttons */}
+<div className="flex space-x-2">
+  {/* View Page Button */}
+  <button
+    onClick={() => handleViewPage(index)}
+    className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md transition-all hover:bg-green-700 hover:shadow-lg"
+  >
+    View
+  </button>
 
+  {/* Delete Button */}
+  <button
+    onClick={() => handleDelete(index)}
+    className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md transition-all hover:bg-red-700 hover:shadow-lg"
+  >
+    Delete
+  </button>
+</div>
 
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => handleDelete(index)}
-                    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </div>
               </div>
             ))
           )}
@@ -118,6 +145,7 @@ export default function HomePage() {
   );
 }
 
+// Sidebar Navigation Item
 function NavItem({ text, active }) {
   return (
     <div
