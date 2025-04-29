@@ -23,7 +23,7 @@ export default function DataStructurePage() {
           setDataStructure(data);
   
           const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-          setIsFavorite(favorites.includes(data.id));
+          setIsFavorite(favorites.includes(data.id || data._id));
         } else {
           alert("Failed to load data structure.");
         }

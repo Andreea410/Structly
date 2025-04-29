@@ -33,11 +33,9 @@ export default function AddDataStructure() {
   
     try {
       const newDataStructure = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
         title,
         description,
         paragraphs: await Promise.all(paragraphs.map(async (p) => {
-          // For already uploaded files (via URL), just use them directly
           if (p.linkUrl && !p.linkUrl.startsWith('blob:')) {
             return {
               text: p.text,
@@ -50,7 +48,6 @@ export default function AddDataStructure() {
             };
           }
   
-          // For local files that need to be uploaded
           if (p.file) {
             const fileData = await fileToBase64(p.file);
             return {
@@ -67,7 +64,6 @@ export default function AddDataStructure() {
             };
           }
   
-          // For text-only paragraphs
           return {
             text: p.text
           };

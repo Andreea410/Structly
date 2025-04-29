@@ -5,15 +5,17 @@ const paragraphSchema = new mongoose.Schema({
   text: String,
   link: {
     type: {
-      type: String, 
+      type: String,
+      enum: ['image', 'video', 'article', 'github', 'tutorial'],
     },
+    url: String,
     file: {
-      data: String, 
-      type: String, 
-    },
-    url: String 
+      data: String, // base64
+      type: String, // "image/png", "video/mp4", etc.
+    }
   }
 });
+
 
 const dataStructureSchema = new mongoose.Schema({
   title: String,

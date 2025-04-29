@@ -4,9 +4,9 @@ import DataStructure from '../../../../models/DataStructure';
 import { validateEntity } from '../../../../lib/validation';
 import { getWebSocketManager } from '../../../../lib/websocketServer';
 
-export async function GET(req, { params }) {
+export async function GET(req, context) {
   await dbConnect();
-  const { id } = params;
+  const { id } = context.params;
 
   if (!id || id === "undefined") {
     return NextResponse.json({ error: "Missing ID" }, { status: 400 });
@@ -17,16 +17,18 @@ export async function GET(req, { params }) {
     if (!entity) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
     }
-    return NextResponse.json(entity);
+    const entityObject = entity.toObject();
+    entityObject.id = entity._id;
+    return NextResponse.json(entityObject);
   } catch (err) {
     return NextResponse.json({ error: "Error fetching entity" }, { status: 500 });
   }
 }
 
 
-export async function PATCH(req, { params }) {
+export async function PATCH(req, context ) {
   await dbConnect();
-  const { id } = params;
+  const { id } = context.params;
   const updates = await req.json();
   const wsManager = getWebSocketManager();
 
@@ -54,9 +56,9 @@ export async function PATCH(req, { params }) {
   return NextResponse.json(updated, { status: 200 });
 }
 
-export async function DELETE(req, { params }) {
+export async function DELETE(req,context) {
   await dbConnect();
-  const { id } = params;
+  const { id } = context.params;
   const wsManager = getWebSocketManager();
 
   const deleted = await DataStructure.findByIdAndDelete(id);
