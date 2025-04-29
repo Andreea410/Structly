@@ -1,43 +1,42 @@
-import { NextResponse } from 'next/server';
-import { getEntities, addEntity } from '../../../lib/dataStore.js';
-import { validateEntity } from '../../../lib/validation.js';
+import { NextResponse } from "next/server";
+import { dbConnect } from "../../../lib/dbConnect";
+import DataStructure from "../../../models/DataStructure";
 
 export async function GET(req) {
-  const { searchParams } = new URL(req.url);
-  const search = searchParams.get('search') || "";
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "10");
-
   try {
-    let entities = getEntities();
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
 
-    if (search) {
-      entities = entities.filter(entity =>
-        entity.title.toLowerCase().includes(search.toLowerCase())
-      );
-    }
+    const search = searchParams.get("search") || "";
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
 
-    const start = (page - 1) * limit;
-    const paginated = entities.slice(start, start + limit);
+    const filter = search
+      ? { title: { $regex: search, $options: "i" } }
+      : {};
 
-    return NextResponse.json(paginated, { status: 200 });
+    const entities = await DataStructure.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .sort({ usageCount: -1 }); 
+
+    return NextResponse.json(entities, { status: 200 });
   } catch (err) {
+    console.error("GET /entities error:", err);
     return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
   }
 }
 
 export async function POST(req) {
-  const entity = await req.json();
-
-  const errors = validateEntity(entity); 
-  if (errors.length) {
-    return NextResponse.json({ errors }, { status: 400 });
-  }
-
   try {
-    const created = addEntity(entity); // No need to await, it’s sync
+    await dbConnect();
+    const body = await req.json();
+
+    const created = await DataStructure.create(body);
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 409 }); 
+    console.error("POST /entities error:", err);
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }

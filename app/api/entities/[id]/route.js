@@ -1,21 +1,24 @@
 import { NextResponse } from 'next/server';
-import { getEntityById, updateEntity, deleteEntity } from '../../../../lib/dataStore.js';
-import { validateEntity } from '../../../../lib/validation.js';
-import { getWebSocketManager } from '../../../../lib/websocketServer.js';
+import { dbConnect } from '../../../lib/dbConnect';
+import DataStructure from '../../../models/DataStructure';
+import { validateEntity } from '../../../lib/validation';
+import { getWebSocketManager } from '../../../websocketServer';
 
-export async function GET(req, context) {
-  const { id } = await context.params; // Awaiting context.params
-  const entity = getEntityById(id);
+export async function GET(req, { params }) {
+  await dbConnect();
+  const { id } = params;
 
+  const entity = await DataStructure.findById(id);
   if (!entity) {
-    return NextResponse.json({ error: "Entity not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Entity not found' }, { status: 404 });
   }
 
   return NextResponse.json(entity, { status: 200 });
 }
 
-export async function PATCH(req, context) {
-  const { id } = await context.params; // Awaiting context.params
+export async function PATCH(req, { params }) {
+  await dbConnect();
+  const { id } = params;
   const updates = await req.json();
   const wsManager = getWebSocketManager();
 
@@ -24,14 +27,13 @@ export async function PATCH(req, context) {
     return NextResponse.json({ errors }, { status: 400 });
   }
 
-  const existing = getEntityById(id);
-  if (!existing) {
-    return NextResponse.json({ error: "Entity not found" }, { status: 404 });
-  }
+  const updated = await DataStructure.findByIdAndUpdate(id, updates, {
+    new: true,
+    runValidators: true
+  });
 
-  const updated = updateEntity(id, updates);
   if (!updated) {
-    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+    return NextResponse.json({ error: 'Update failed or entity not found' }, { status: 404 });
   }
 
   if (wsManager) {
@@ -44,16 +46,16 @@ export async function PATCH(req, context) {
   return NextResponse.json(updated, { status: 200 });
 }
 
-export async function DELETE(req, context) {
-  const { id } = await context.params; // Awaiting context.params
-  const entity = getEntityById(id);
+export async function DELETE(req, { params }) {
+  await dbConnect();
+  const { id } = params;
   const wsManager = getWebSocketManager();
 
-  if (!entity) {
-    return NextResponse.json({ error: "Entity not found" }, { status: 404 });
-  }
+  const deleted = await DataStructure.findByIdAndDelete(id);
 
-  deleteEntity(id);
+  if (!deleted) {
+    return NextResponse.json({ error: 'Entity not found' }, { status: 404 });
+  }
 
   if (wsManager) {
     wsManager.broadcast({
@@ -62,5 +64,5 @@ export async function DELETE(req, context) {
     });
   }
 
-  return NextResponse.json({ message: "Deleted successfully" }, { status: 200 });
+  return NextResponse.json({ message: 'Deleted successfully' }, { status: 200 });
 }

@@ -5,10 +5,10 @@ export default function handler(req, res) {
   if (!res.socket.server.io) {
     console.log("Setting up Socket.io...");
     const io = new Server(res.socket.server, {
-      path: "/api/socket", // optional if you're using a custom path
+      path: "/api/socket", 
     });
 
-    setIO(io); // Make it accessible to other modules
+    setIO(io); 
 
     res.socket.server.io = io;
 
