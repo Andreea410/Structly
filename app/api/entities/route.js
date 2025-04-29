@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "../../../lib/dbConnect";
-import DataStructure from "../../../models/DataStructure";
+import DataStructure from "/models/DataStructure";
 
 export async function GET(req) {
   try {
@@ -10,16 +10,33 @@ export async function GET(req) {
     const search = searchParams.get("search") || "";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const sortOption = searchParams.get("sort") || "default";
     const skip = (page - 1) * limit;
 
     const filter = search
       ? { title: { $regex: search, $options: "i" } }
       : {};
 
+    // choose sort logic based on sortOption
+    let sort = {};
+    if (sortOption === "name-asc") {
+      sort = { title: 1 };
+    } else if (sortOption === "name-desc") {
+      sort = { title: -1 };
+    } else if (sortOption === "most-used") {
+      sort = { usageCount: -1 };
+    } else if (sortOption === "least-used") {
+      sort = { usageCount: 1 };
+    } else if (sortOption === "newest") {
+      sort = { createdAt: -1 };
+    } else if (sortOption === "oldest") {
+      sort = { createdAt: 1 };
+    }
+
     const entities = await DataStructure.find(filter)
+      .sort(sort)
       .skip(skip)
-      .limit(limit)
-      .sort({ usageCount: -1 }); 
+      .limit(limit);
 
     return NextResponse.json(entities, { status: 200 });
   } catch (err) {
@@ -27,6 +44,7 @@ export async function GET(req) {
     return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
   }
 }
+
 
 export async function POST(req) {
   try {

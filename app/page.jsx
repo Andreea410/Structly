@@ -16,9 +16,11 @@ export default function HomePage() {
   const [dataStructures, setDataStructures] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isClient, setIsClient] = useState(false);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [sortOption, setSortOption] = useState("default");
   const limit = 5;
   const { socket, isConnected } = useSocket();
   const { networkOnline, serverOnline } = useNetworkStatus();
@@ -94,72 +96,61 @@ export default function HomePage() {
 
   const fetchData = async (pageToFetch = 1) => {
     if (isLoading || !hasMore) return;
-  
-  setIsLoading(true);
-  
-  try {
-    if (pageToFetch === 1 && !networkOnline) {
-      const cached = localStorage.getItem("offline-home-data");
-      if (cached) {
-        const offlineData = JSON.parse(cached);
-        if (offlineData.length > 0) {
-          setDataStructures(offlineData);
-          calculateStatistics(offlineData);
-          setHasMore(false);
-          return;
-        }
-      }
-    }
-    if (!networkOnline || !serverOnline) {
-      const cached = localStorage.getItem("offline-home-data");
-      if (cached) {
-        const offlineData = JSON.parse(cached);
-        setDataStructures(offlineData);
-        calculateStatistics(offlineData);
-        setHasMore(false);
-        return;
-      }
-    }
-  
+
+    setIsLoading(true);
+
+    try {
       const url = `/api/entities?page=${pageToFetch}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch data");
-  
+
       const newData = await res.json();
-  
-      let updatedData;
-      if (pageToFetch === 1) {
-        updatedData = newData;
-      } else {
-        updatedData = [...dataStructures, ...newData];
-      }
+
+      let updatedData = pageToFetch === 1 ? newData : [...dataStructures, ...newData];
+
+      updatedData = sortData(updatedData, sortOption);
+
       setDataStructures(updatedData);
-      localStorage.setItem("offline-home-data", JSON.stringify(updatedData));
-  
+
       if (newData.length < limit) setHasMore(false);
-  
-      calculateStatistics(pageToFetch === 1 ? newData : [...dataStructures, ...newData]);
+
+      calculateStatistics(updatedData);
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const lastElementRef = useCallback(
-    (node) => {
-      if (isLoading) return;
-      if (observer.current) observer.current.disconnect();
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prev) => prev + 1);
-        }
-      });
-      if (node) observer.current.observe(node);
-    },
-    [isLoading, hasMore]
-  );
+  const sortData = (data, option) => {
+    if (option === "name-asc") {
+      return [...data].sort((a, b) => a.title.localeCompare(b.title));
+    } else if (option === "name-desc") {
+      return [...data].sort((a, b) => b.title.localeCompare(a.title));
+    } else if (option === "most-used") {
+      return [...data].sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+    } else if (option === "least-used") {
+      return [...data].sort((a, b) => (a.usageCount || 0) - (b.usageCount || 0));
+    } else if (option === "newest") {
+      return [...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (option === "oldest") {
+      return [...data].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    } else {
+      return data;
+    }
+  };
+
+  const lastElementRef = useCallback((node) => {
+    if (isLoading) return;
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage((prev) => prev + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading, hasMore]);
 
   const calculateStatistics = (data) => {
     if (data.length === 0) {
@@ -352,19 +343,34 @@ export default function HomePage() {
 
         {/* Search and Actions */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+          {/* Search */}
           <div className="relative w-full md:w-96">
-            <FiSearch
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400"
-              size={20}
-            />
+            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
             <input
               type="text"
               placeholder="Search data structures..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-3 pl-12 pr-4 text-lg bg-white rounded-full shadow-sm border border-purple-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all placeholder-purple-300"
+              className="w-full py-3 pl-12 pr-4 text-lg bg-white rounded-full shadow-sm border border-purple-200 focus:ring-2 focus:ring-purple-500"
             />
           </div>
+
+          {/* Sort */}
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="w-full md:w-48 py-3 px-4 bg-white rounded-full border border-purple-300 text-purple-600 shadow-sm focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="default">Sort By</option>
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="most-used">Most Used</option>
+            <option value="least-used">Least Used</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
+        </div>
+
           <div className="flex space-x-3">
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -383,7 +389,6 @@ export default function HomePage() {
               + New Structure
             </motion.button>
           </div>
-        </div>
 
         {/* Data Structures List with Infinite Scroll */} 
         <div className="space-y-4 mb-8">
