@@ -74,15 +74,9 @@ export default function HomePage() {
     setDataStructures([]);
     setPage(1);
     setHasMore(true);
-  }, [searchQuery, isClient]);
-
-  useEffect(() => {
-    if (!isClient) return;
-    setDataStructures([]);
-    setPage(1);
-    setHasMore(true);
-    fetchData(1); 
-  }, [sortOption]);
+    fetchData(1);  
+  }, [searchQuery, sortOption, isClient]);
+  
   
   useEffect(() => {
     if (networkOnline && serverOnline) {

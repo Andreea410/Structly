@@ -17,7 +17,6 @@ export async function GET(req) {
       ? { title: { $regex: search, $options: "i" } }
       : {};
 
-    // choose sort logic based on sortOption
     let sort = {};
     if (sortOption === "name-asc") {
       sort = { title: 1 };
@@ -32,7 +31,7 @@ export async function GET(req) {
     } else if (sortOption === "oldest") {
       sort = { createdAt: 1 };
     }
-
+    
     const entities = await DataStructure.find(filter)
       .sort(sort)
       .skip(skip)
