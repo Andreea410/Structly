@@ -77,6 +77,14 @@ export default function HomePage() {
   }, [searchQuery, isClient]);
 
   useEffect(() => {
+    if (!isClient) return;
+    setDataStructures([]);
+    setPage(1);
+    setHasMore(true);
+  }, [sortOption]);
+  
+
+  useEffect(() => {
     if (networkOnline && serverOnline) {
       processQueue().then(() => {
         setDataStructures([]);
@@ -100,8 +108,9 @@ export default function HomePage() {
     setIsLoading(true);
 
     try {
-      const url = `/api/entities?page=${pageToFetch}&limit=${limit}&search=${encodeURIComponent(searchQuery)}`;
-      const res = await fetch(url);
+      const url = `/api/entities?` +
+      `page=${pageToFetch}&limit=${limit}&search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
+          const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch data");
 
       const newData = await res.json();
