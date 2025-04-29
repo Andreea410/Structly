@@ -90,33 +90,56 @@ export default function HomePage() {
   }, [networkOnline, serverOnline]);
 
   useEffect(() => {
-    if (!isClient || page < 1) return;
-    fetchData(page);
-  }, [page, isClient, searchQuery]); 
+    if (!isClient) return;
+    
+    const fetchResetData = async () => {
+      setIsLoading(true);
+      setDataStructures([]);  // reset old data
+      setPage(1);             // reset page
+      setHasMore(true);
+  
+      try {
+        const url = `/api/entities?page=1&limit=${limit}&search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to fetch data");
+  
+        const newData = await res.json();
+  
+        setDataStructures(newData);
+        setHasMore(newData.length >= limit);
+        calculateStatistics(newData);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchResetData(); 
+  }, [searchQuery, sortOption, isClient]);
   
   
-
-  const fetchData = async (pageToFetch = 1) => {
+  const fetchData = async (pageToFetch) => {
     if (isLoading || !hasMore) return;
-
+  
     setIsLoading(true);
-
+  
     try {
-      const url = `/api/entities?` +
-      `page=${pageToFetch}&limit=${limit}&search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
-          const res = await fetch(url);
+      const url = `/api/entities?page=${pageToFetch}&limit=${limit}&search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch data");
-
+  
       const newData = await res.json();
-
-      let updatedData = pageToFetch === 1 ? newData : [...dataStructures, ...newData];
-
-      updatedData = sortData(updatedData, sortOption);
-
+  
+      let updatedData;
+      if (pageToFetch === 1) {
+        updatedData = newData;
+      } else {
+        updatedData = deduplicateById([...dataStructures, ...newData]);
+      }
+  
       setDataStructures(updatedData);
-
-      if (newData.length < limit) setHasMore(false);
-
+      setHasMore(newData.length >= limit);
       calculateStatistics(updatedData);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -124,6 +147,16 @@ export default function HomePage() {
       setIsLoading(false);
     }
   };
+  
+  function deduplicateById(data) {
+    const seen = new Set();
+    return data.filter((item) => {
+      if (seen.has(item._id)) return false;
+      seen.add(item._id);
+      return true;
+    });
+  }
+  
 
   const sortData = (data, option) => {
     if (option === "name-asc") {

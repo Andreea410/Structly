@@ -13,9 +13,12 @@ export async function GET(req) {
     const sortOption = searchParams.get("sort") || "default";
     const skip = (page - 1) * limit;
 
-    const filter = search
-      ? { title: { $regex: search, $options: "i" } }
-      : {};
+    const filter = search ? { 
+      $or: [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ]
+    } : {};
 
     let sort = {};
     if (sortOption === "name-asc") {
@@ -31,7 +34,7 @@ export async function GET(req) {
     } else if (sortOption === "oldest") {
       sort = { createdAt: 1 };
     }
-    
+
     const entities = await DataStructure.find(filter)
       .sort(sort)
       .skip(skip)
