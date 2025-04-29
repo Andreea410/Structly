@@ -213,21 +213,21 @@ export default function HomePage() {
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this data structure?")) return;
-
+  
     if (!networkOnline || !serverOnline) {
-      queueOperation({ url: `/api/entities/${id}`
-        , method: "DELETE" });
-      setDataStructures((prev) => prev.filter((ds) => ds.id !== id));
+      queueOperation({ url: `/api/entities/${id}`, method: "DELETE" });
+      setDataStructures((prev) => prev.filter((ds) => ds._id !== id));  
       return;
     }
-
+  
     try {
       await fetch(`/api/entities/${id}`, { method: "DELETE" });
-      setDataStructures((prev) => prev.filter((ds) => ds.id !== id));
+      setDataStructures((prev) => prev.filter((ds) => ds._id !== id));  
     } catch (err) {
       console.error("Delete error:", err);
     }
   };
+  
 
   const handleViewPage = async (item) => {
     const updatedItem = {
