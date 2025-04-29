@@ -81,9 +81,9 @@ export default function HomePage() {
     setDataStructures([]);
     setPage(1);
     setHasMore(true);
+    fetchData(1); 
   }, [sortOption]);
   
-
   useEffect(() => {
     if (networkOnline && serverOnline) {
       processQueue().then(() => {
