@@ -549,7 +549,7 @@ function DataStructureCard({ item, statistics, onView, onDelete }) {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => onView(item)}
+          onClick={() => onView({ ...item, id: item._id }) }
           className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow hover:shadow-lg transition-all"
         >
           View
@@ -557,7 +557,7 @@ function DataStructureCard({ item, statistics, onView, onDelete }) {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => onDelete(item.id)}
+          onClick={() => onDelete(item._id)}
           className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg shadow hover:shadow-lg transition-all"
         >
           Delete

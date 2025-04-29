@@ -53,7 +53,7 @@ export default function DataStructurePage() {
           paragraphs: updatedParagraphs,
         };
   
-        const res = await fetch(`/api/entities/${dataStructure.id}`, {
+        const res = await fetch(`/api/entities/${dataStructure._id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updated),
@@ -75,7 +75,7 @@ export default function DataStructurePage() {
   };
 
 const handleDelete = async () => {
-  const res = await fetch(`/api/entities/${dataStructure.id}`, {
+  const res = await fetch(`/api/entities/${dataStructure._id}`, {
     method: "DELETE",
   });
 
