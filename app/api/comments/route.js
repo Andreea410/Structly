@@ -1,24 +1,34 @@
-import { NextResponse } from "next/server";
-import { dbConnect } from "../../../lib/dbConnect";
-import Comment from "../../../models/Comment";
+import { NextResponse } from 'next/server';
+import { dbConnect } from '../../../lib/dbConnect';
+import Comment from '../../../models/Comment';
+import DataStructure from '../../../models/DataStructure';
 
 export async function POST(req) {
-  await dbConnect();
-  const { text, dataStructureId } = await req.json();
+  try {
+    await dbConnect();
 
-  if (!text || !dataStructureId) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const { text, dataStructureId } = await req.json();
+
+    if (!text || !dataStructureId) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
+
+    // ⚡ Important: Include the dataStructure field when creating the Comment
+    const comment = await Comment.create({
+      text,
+      dataStructure: dataStructureId
+    });
+
+    // 💬 Push the comment._id into DataStructure.comments
+    await DataStructure.findByIdAndUpdate(
+      dataStructureId,
+      { $push: { comments: comment._id } },
+      { new: true }
+    );
+
+    return NextResponse.json(comment, { status: 201 });
+  } catch (error) {
+    console.error("POST /comments error:", error);
+    return NextResponse.json({ error: "Failed to post comment" }, { status: 500 });
   }
-
-  const comment = await Comment.create({ text, dataStructure: dataStructureId });
-  return NextResponse.json(comment, { status: 201 });
-}
-
-export async function GET(req) {
-  await dbConnect();
-  const { searchParams } = new URL(req.url);
-  const dataStructureId = searchParams.get("dataStructureId");
-
-  const comments = await Comment.find({ dataStructure: dataStructureId }).sort({ createdAt: -1 });
-  return NextResponse.json(comments);
 }

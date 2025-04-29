@@ -8,7 +8,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 let interval;
-let sendingEnabled = true; // Control flag
+let sendingEnabled = false; // Control flag
 
 app.prepare().then(() => {
   const server = createServer((req, res) => {
