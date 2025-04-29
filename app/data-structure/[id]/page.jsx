@@ -210,6 +210,59 @@ const handleDelete = async () => {
               ))}
             </div>
 
+            <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-4 text-purple-700">Comments</h2>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const commentText = e.target.comment.value;
+                const res = await fetch("/api/comments", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ text: commentText, dataStructureId: dataStructure._id }),
+                });
+                if (res.ok) {
+                  const newComment = await res.json();
+                  setDataStructure((prev) => ({
+                    ...prev,
+                    comments: [...(prev.comments || []), newComment],
+                  }));
+                  e.target.reset();
+                } else {
+                  alert("Failed to post comment");
+                }
+              }}
+              className="space-y-4"
+            >
+              <textarea
+                name="comment"
+                placeholder="Write your thoughts..."
+                className="w-full p-4 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                rows="3"
+              ></textarea>
+              <button
+                type="submit"
+                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition"
+              >
+                Add Comment
+              </button>
+            </form>
+
+            <div className="mt-6 space-y-4">
+              {(dataStructure.comments || []).map((comment, idx) => (
+                <div
+                  key={idx}
+                  className="bg-purple-50 border border-purple-200 p-4 rounded-lg shadow-sm"
+                >
+                  <p className="text-gray-800">{comment.text}</p>
+                  <span className="text-sm text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+
             <div className="mt-12 flex justify-center">
               <button
                 onClick={handleDelete}

@@ -1,20 +1,28 @@
 import { NextResponse } from 'next/server';
-import { dbConnect } from '../../../lib/dbConnect';
-import DataStructure from '../../../models/DataStructure';
-import { validateEntity } from '../../../lib/validation';
-import { getWebSocketManager } from '../../../websocketServer';
+import { dbConnect } from '../../../../lib/dbConnect';
+import DataStructure from '../../../../models/DataStructure';
+import { validateEntity } from '../../../../lib/validation';
+import { getWebSocketManager } from '../../../../lib/websocketServer';
 
 export async function GET(req, { params }) {
   await dbConnect();
   const { id } = params;
 
-  const entity = await DataStructure.findById(id);
-  if (!entity) {
-    return NextResponse.json({ error: 'Entity not found' }, { status: 404 });
+  if (!id || id === "undefined") {
+    return NextResponse.json({ error: "Missing ID" }, { status: 400 });
   }
 
-  return NextResponse.json(entity, { status: 200 });
+  try {
+    const entity = await DataStructure.findById(id).populate("comments");
+    if (!entity) {
+      return NextResponse.json({ error: "Entity not found" }, { status: 404 });
+    }
+    return NextResponse.json(entity);
+  } catch (err) {
+    return NextResponse.json({ error: "Error fetching entity" }, { status: 500 });
+  }
 }
+
 
 export async function PATCH(req, { params }) {
   await dbConnect();
