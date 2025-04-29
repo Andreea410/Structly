@@ -3,28 +3,33 @@ import { dbConnect } from '../../../../lib/dbConnect';
 import DataStructure from '../../../../models/DataStructure';
 import { validateEntity } from '../../../../lib/validation';
 import { getWebSocketManager } from '../../../../lib/websocketServer';
+import Comment from '../../../../models/Comment';
 
-export async function GET(req, { params }) {
+
+export async function GET(req, context) {
+  const { id } = await context.params;
+
+  await dbConnect();
+
+  if (!id || id === "undefined") {
+    return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+  }
+
   try {
-    await dbConnect();
-
-    const { id } = params;
-
-    if (!id || id === "undefined") {
-      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
-    }
-
     const entity = await DataStructure.findById(id).populate("comments");
     if (!entity) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
     }
+
     const entityObject = entity.toObject();
     entityObject.id = entity._id;
     return NextResponse.json(entityObject);
   } catch (err) {
+    console.error("GET error:", err);
     return NextResponse.json({ error: "Error fetching entity" }, { status: 500 });
   }
 }
+
 
 export async function PATCH(req, { params }) {
   try {

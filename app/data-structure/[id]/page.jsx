@@ -11,12 +11,15 @@ export default function DataStructurePage() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedText, setEditedText] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchEntity = async () => {
       if (!id) return;
   
       try {
+        setLoading(true);
         const res = await fetch(`/api/entities/${id}`);
         if (res.ok) {
           const data = await res.json();
