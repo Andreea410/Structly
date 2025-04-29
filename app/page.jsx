@@ -399,7 +399,7 @@ export default function HomePage() {
             </div>
           ) : (
             dataStructures.map((item, index) => (
-              <div key={item.id} ref={index === dataStructures.length - 1 ? lastElementRef : null}>
+              <div key={item._id || item.id || index} ref={index === dataStructures.length - 1 ? lastElementRef : null}>
                 <DataStructureCard
                   item={item}
                   statistics={statistics}
