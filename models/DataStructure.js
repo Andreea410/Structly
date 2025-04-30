@@ -10,19 +10,22 @@ const paragraphSchema = new mongoose.Schema({
     },
     url: String,
     file: {
-      data: String, // base64
-      type: String, // "image/png", "video/mp4", etc.
+      data: String,
+      type: String, 
     }
   }
 });
-
 
 const dataStructureSchema = new mongoose.Schema({
   title: String,
   description: String,
   usageCount: { type: Number, default: 0 },
   paragraphs: [paragraphSchema],
-  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }] 
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }]
 });
+
+dataStructureSchema.index({ usageCount: 1 });
+dataStructureSchema.index({ title: 1 }); 
+dataStructureSchema.index({ "paragraphs.link.url": 1 }); 
 
 export default mongoose.models.DataStructure || mongoose.model("DataStructure", dataStructureSchema);
