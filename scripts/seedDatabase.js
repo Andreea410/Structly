@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import { faker } from "@faker-js/faker";
-import DataStructure from "../models/DataStructure"; 
+import DataStructure from "../models/DataStructure.js"; 
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 
-const MONGO_URI = process.env.MONGO_URI || "your mongodb connection string here";
+const MONGO_URI = process.env.MONGODB_URI || "your fallback URI";
 
 async function seedDatabase() {
   await mongoose.connect(MONGO_URI);
@@ -14,7 +16,7 @@ async function seedDatabase() {
     fakeData.push({
       title: faker.lorem.words(3),
       description: faker.lorem.sentence(),
-      usageCount: faker.datatype.number({ min: 0, max: 500 }),
+      usageCount: faker.number.int({ min: 0, max: 500 }),
       createdAt: faker.date.past(2), 
     });
   }
