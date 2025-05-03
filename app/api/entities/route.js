@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "../../../lib/dbConnect";
 import DataStructure from "/models/DataStructure";
+import { getCurrentUser } from '../../../lib/auth'; 
 
 export async function GET(req) {
   try {
@@ -47,16 +48,27 @@ export async function GET(req) {
   }
 }
 
-
 export async function POST(req) {
   try {
     await dbConnect();
     const body = await req.json();
+    const currentUser = await getCurrentUser(req);
 
-    const created = await DataStructure.create(body);
+    const entityData = {
+      ...body,
+      createdBy: currentUser._id
+    };
+
+    const errors = validateEntity(entityData);
+    if (errors.length) {
+      return NextResponse.json({ errors }, { status: 400 });
+    }
+
+    const created = await DataStructure.create(entityData);
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error("POST /entities error:", err);
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 }
+

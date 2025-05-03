@@ -44,7 +44,7 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
     }
 
-    const currentUser = await getCurrentUser(); 
+    const currentUser = await getCurrentUser(req); 
     if (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -84,7 +84,7 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
     }
 
-    const currentUser = await getCurrentUser(); 
+    const currentUser = await getCurrentUser(req); 
     if (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
