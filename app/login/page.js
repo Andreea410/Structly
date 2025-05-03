@@ -19,7 +19,7 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
-      router.push("/"); // redirect to homepage
+      router.push("/"); 
     } else {
       alert("Invalid email or password");
     }
