@@ -3,8 +3,6 @@ import { dbConnect } from '../../../../lib/dbConnect';
 import DataStructure from '../../../../models/DataStructure';
 import { validateEntity } from '../../../../lib/validation';
 import { getWebSocketManager } from '../../../../lib/websocketServer';
-import Comment from '../../../../models/Comment';
-
 
 export async function GET(req, context) {
   const { id } = await context.params;
@@ -30,7 +28,6 @@ export async function GET(req, context) {
   }
 }
 
-
 export async function PATCH(req, { params }) {
   try {
     await dbConnect();
@@ -40,6 +37,16 @@ export async function PATCH(req, { params }) {
 
     if (!id || id === "undefined") {
       return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    }
+
+    const entity = await DataStructure.findById(id);
+    if (!entity) {
+      return NextResponse.json({ error: "Entity not found" }, { status: 404 });
+    }
+
+    const currentUser = await getCurrentUser(); 
+    if (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const errors = validateEntity(updates);
@@ -52,15 +59,8 @@ export async function PATCH(req, { params }) {
       runValidators: true
     });
 
-    if (!updated) {
-      return NextResponse.json({ error: 'Update failed or entity not found' }, { status: 404 });
-    }
-
     if (wsManager) {
-      wsManager.broadcast({
-        type: 'ENTITY_UPDATED',
-        data: updated
-      });
+      wsManager.broadcast({ type: 'ENTITY_UPDATED', data: updated });
     }
 
     return NextResponse.json(updated, { status: 200 });
@@ -79,17 +79,20 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     }
 
-    const deleted = await DataStructure.findOneAndDelete({ _id: id });
-
-    if (!deleted) {
-      return NextResponse.json({ error: 'Entity not found' }, { status: 404 });
+    const entity = await DataStructure.findById(id);
+    if (!entity) {
+      return NextResponse.json({ error: "Entity not found" }, { status: 404 });
     }
 
+    const currentUser = await getCurrentUser(); 
+    if (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    await DataStructure.findByIdAndDelete(id);
+
     if (wsManager) {
-      wsManager.broadcast({
-        type: 'ENTITY_DELETED',
-        data: { id }
-      });
+      wsManager.broadcast({ type: 'ENTITY_DELETED', data: { id } });
     }
 
     return NextResponse.json({ message: 'Deleted successfully' }, { status: 200 });
@@ -97,3 +100,4 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ error: "Error deleting entity" }, { status: 500 });
   }
 }
+
