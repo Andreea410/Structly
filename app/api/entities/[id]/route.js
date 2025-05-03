@@ -34,7 +34,6 @@ export async function GET(req, context) {
 export async function PATCH(req, { params }) {
   try {
     await dbConnect();
-    // Properly await the params
     const { id } = params;
     const updates = await req.json();
     const wsManager = getWebSocketManager();
@@ -73,7 +72,6 @@ export async function PATCH(req, { params }) {
 export async function DELETE(req, { params }) {
   try {
     await dbConnect();
-    // Properly await the params
     const { id } = params;
     const wsManager = getWebSocketManager();
 

@@ -13,13 +13,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // ⚡ Important: Include the dataStructure field when creating the Comment
     const comment = await Comment.create({
       text,
       dataStructure: dataStructureId
     });
 
-    // 💬 Push the comment._id into DataStructure.comments
     await DataStructure.findByIdAndUpdate(
       dataStructureId,
       { $push: { comments: comment._id } },
