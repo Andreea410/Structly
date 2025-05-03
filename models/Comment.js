@@ -5,4 +5,5 @@ const commentSchema = new mongoose.Schema({
   dataStructure: { type: mongoose.Schema.Types.ObjectId, ref: 'DataStructure', required: true }, 
 }, { timestamps: true });
 
+commentSchema.index({ dataStructure: 1 });
 export default mongoose.models.Comment || mongoose.model("Comment", commentSchema);
