@@ -79,7 +79,7 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     }
 
-    const deleted = await DataStructure.findByIdAndDelete(id);
+    const deleted = await DataStructure.findOneAndDelete({ _id: id });
 
     if (!deleted) {
       return NextResponse.json({ error: 'Entity not found' }, { status: 404 });
