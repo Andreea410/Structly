@@ -71,9 +71,13 @@ export default function AddDataStructure() {
         usageCount: 0
       };
   
+      const token = localStorage.getItem("token");
       const res = await fetch("/api/entities", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // 👈 add this
+        },
         body: JSON.stringify(newDataStructure)
       });
   

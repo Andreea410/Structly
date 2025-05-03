@@ -23,6 +23,10 @@ export default function LoginPage() {
     } else {
       alert("Invalid email or password");
     }
+
+    const data = await res.json();
+    localStorage.setItem("token", data.token); // 👈 Save the token
+    router.push("/");
   };
 
   return (

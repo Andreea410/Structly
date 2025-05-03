@@ -72,3 +72,17 @@ export async function POST(req) {
   }
 }
 
+function validateEntity(entity) {
+  const errors = [];
+
+  if (!entity.title || entity.title.trim() === "") {
+    errors.push("Title is required.");
+  }
+
+  if (!entity.description || entity.description.trim() === "") {
+    errors.push("Description is required.");
+  }
+  return errors;
+}
+
+
