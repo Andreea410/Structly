@@ -10,6 +10,8 @@ import useNetworkStatus from "../hooks/useNetworkStatus";
 import NetworkBanner from "../components/NetworkBanner";
 import { queueOperation, processQueue } from "../services/offlineQueueService";
 import useSocket from "../hooks/useSocket";
+import Link from "next/link";
+
 
 export default function HomePage() {
   const router = useRouter();
@@ -334,6 +336,12 @@ export default function HomePage() {
         </nav>
 
         <div className="mt-10 space-y-3">
+        <Link href="/login">
+          <NavItem text="Login" />
+        </Link>
+        <Link href="/signup">
+          <NavItem text="Sign Up" />
+        </Link>
           <NavItem text="Settings" />
           <NavItem text="Log Out" />
         </div>
