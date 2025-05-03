@@ -94,8 +94,8 @@ export default function HomePage() {
     
     const fetchResetData = async () => {
       setIsLoading(true);
-      setDataStructures([]);  // reset old data
-      setPage(1);             // reset page
+      setDataStructures([]);  
+      setPage(1);             
       setHasMore(true);
   
       try {
@@ -118,6 +118,19 @@ export default function HomePage() {
     fetchResetData(); 
   }, [searchQuery, sortOption, isClient]);
   
+  useEffect(() => {
+    if (page !== 1) {
+      fetchData(page);
+    }
+  }, [page]);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPage((prev) => prev + 1);
+    }, 1000);
+  
+    return () => clearInterval(interval);
+  }, []);
   
   const fetchData = async (pageToFetch) => {
     if (isLoading || !hasMore) return;
@@ -157,7 +170,6 @@ export default function HomePage() {
     });
   }
   
-
   const sortData = (data, option) => {
     if (option === "name-asc") {
       return [...data].sort((a, b) => a.title.localeCompare(b.title));
@@ -228,7 +240,6 @@ export default function HomePage() {
     }
   };
   
-
   const handleViewPage = async (item) => {
     const updatedItem = {
       ...item,
