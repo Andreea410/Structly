@@ -21,7 +21,8 @@ const dataStructureSchema = new mongoose.Schema({
   description: String,
   usageCount: { type: Number, default: 0 },
   paragraphs: [paragraphSchema],
-  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }]
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
 });
 
 dataStructureSchema.index({ usageCount: 1 });
