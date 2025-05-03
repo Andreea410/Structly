@@ -10,14 +10,8 @@ async function deleteAllDocuments() {
   await mongoose.connect(MONGO_URI);
   console.log("Connected to MongoDB");
 
-  const allStructures = await DataStructure.find({});
-  let deletedCount = 0;
-
-  for (const doc of allStructures) {
-    await DataStructure.findOneAndDelete({ _id: doc._id });
-    deletedCount++;
-  }
-  console.log(`Deleted ${deletedCount} data structures and their comments.`);
+  const result = await DataStructure.deleteMany({});
+  console.log(`Deleted ${result.deletedCount} documents`);
 
   await mongoose.disconnect();
   console.log("Disconnected from MongoDB");
