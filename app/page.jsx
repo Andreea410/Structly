@@ -361,6 +361,33 @@ export default function HomePage() {
   
   const handleAddDataStructure = () => router.push("/add-data-structure");
 
+  const simulateAttack = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to simulate the attack.");
+      return;
+    }
+  
+    for (let i = 0; i < 15; i++) {
+      await fetch("/api/entities", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: `SimAttack ${i + 1}`,
+          description: "High frequency insert for test",
+          usageCount: Math.floor(Math.random() * 10),
+        })
+      });
+      console.log(`Simulated POST ${i + 1}`);
+    }
+  
+    alert(" Simulated 15 POST operations.");
+  };
+  
+
   if (!isClient) return <LoadingSkeleton />;
 
   return (
@@ -513,6 +540,16 @@ export default function HomePage() {
             >
               Generate Data
             </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={simulateAttack}
+              className="px-6 py-3 bg-red-600 text-white rounded-full shadow-lg hover:bg-red-700 transition-all flex items-center gap-2"
+              >
+              Simulate Attack
+            </motion.button>
+
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
