@@ -7,7 +7,7 @@ import { getCurrentUser } from '../../../../lib/auth'; // Make sure this import 
 
 // GET /api/entities/:id
 export async function GET(req, context) {
-  const { id } = await context.params; // ✅ Awaited
+  const { id } = await context.params;
 
   await dbConnect();
 
@@ -36,7 +36,7 @@ export async function PATCH(req, context) {
   try {
     await dbConnect();
 
-    const { id } = await context.params; // ✅ Awaited
+    const { id } = await context.params;
     const updates = await req.json();
     const wsManager = getWebSocketManager();
 
@@ -52,7 +52,7 @@ export async function PATCH(req, context) {
     const currentUser = await getCurrentUser(req);
     if (!entity.createdBy || !currentUser?._id ||
         (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+          return NextResponse.json({ error: "You are not allowed to modify this data structure." }, { status: 403 });
     }
 
     const errors = validateEntity(updates);
@@ -80,7 +80,7 @@ export async function PATCH(req, context) {
 export async function DELETE(req, context) {
   try {
     await dbConnect();
-    const { id } = await context.params; // ✅ Awaited
+    const { id } = await context.params;
     const wsManager = getWebSocketManager();
 
     if (!id || id === "undefined") {
@@ -94,7 +94,7 @@ export async function DELETE(req, context) {
 
     const currentUser = await getCurrentUser(req);
     if (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return NextResponse.json({ error: "You are not allowed to modify this data structure." }, { status: 403 });
     }
 
     await DataStructure.findByIdAndDelete(id);
