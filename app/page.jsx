@@ -233,9 +233,25 @@ export default function HomePage() {
       setDataStructures((prev) => prev.filter((ds) => ds._id !== id));  
       return;
     }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You need to be logged in to delete a data structure.");
+      return;
+    }
   
     try {
-      await fetch(`/api/entities/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/entities/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: "Failed to delete" }));
+        alert(error);
+        return;
+      }
       setDataStructures((prev) => prev.filter((ds) => ds._id !== id));  
     } catch (err) {
       console.error("Delete error:", err);

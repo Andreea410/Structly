@@ -50,7 +50,9 @@ export async function PATCH(req, context) {
     }
 
     const currentUser = await getCurrentUser(req);
-    if (!entity.createdBy || !currentUser?._id ||
+    const isOnlyUsageUpdate = Object.keys(updates).length === 1 && typeof updates.usageCount === "number";
+
+    if (!isOnlyUsageUpdate && !entity.createdBy || !currentUser?._id ||
         (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString())) {
           return NextResponse.json({ error: "You are not allowed to modify this data structure." }, { status: 403 });
     }
