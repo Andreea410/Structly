@@ -47,6 +47,13 @@ export default function DataStructurePage() {
 
   const handleSaveEdit = async () => {
     if (editingIndex !== null && dataStructure) {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        alert("You need to log in to edit anything or to add any data structure.");
+        return;
+      }
+  
       try {
         const updatedParagraphs = [...dataStructure.paragraphs];
         updatedParagraphs[editingIndex].text = editedText;
@@ -56,21 +63,21 @@ export default function DataStructurePage() {
           paragraphs: updatedParagraphs,
         };
   
-        const token = localStorage.getItem("token"); 
-
         const res = await fetch(`/api/entities/${dataStructure._id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(updated),
         });
   
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
-          console.error("PATCH error:", err);
-          throw new Error(errorData.error || "Failed to update");
+          const message = errorData.error || "Failed to update";  
+          console.warn("Update blocked:", message);
+          alert(message); 
+          return; 
         }
   
         const json = await res.json();
@@ -82,6 +89,7 @@ export default function DataStructurePage() {
       }
     }
   };
+  
 
 const handleDelete = async () => {
   const res = await fetch(`/api/entities/${dataStructure._id}`, {
