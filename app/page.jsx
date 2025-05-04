@@ -390,12 +390,15 @@ export default function HomePage() {
             </Link>
           )}
           {isAdmin && (
-            <Link href="/monitored-users">
-              <NavItem text="Suspicious Users" />
-            </Link>
+            <>
+              <Link href="/logs">
+                <NavItem text="View Logs" />
+              </Link>
+              <Link href="/logs/monitored">
+                <NavItem text="Suspicious Users" />
+              </Link>
+            </>
           )}
-
-
         </nav>
 
         <div className="mt-10 space-y-3">

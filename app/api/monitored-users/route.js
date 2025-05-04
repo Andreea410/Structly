@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '../../../lib/dbConnect';
+import {dbConnect} from '../../../lib/dbConnect';
 import MonitoredUser from '../../../models/monitoredUser';
 import { getCurrentUser } from '../../../lib/auth';
 
