@@ -20,7 +20,6 @@ export async function POST(req) {
     throw new Error("JWT_SECRET is not set in environment variables");
   }
 
-  // ✅ Define payload with user info
   const payload = {
     id: user._id,
     email: user.email,

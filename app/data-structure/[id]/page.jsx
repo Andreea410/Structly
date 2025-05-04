@@ -56,14 +56,20 @@ export default function DataStructurePage() {
           paragraphs: updatedParagraphs,
         };
   
+        const token = localStorage.getItem("token"); 
+
         const res = await fetch(`/api/entities/${dataStructure._id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, 
+          },
           body: JSON.stringify(updated),
         });
   
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
+          console.error("PATCH error:", err);
           throw new Error(errorData.error || "Failed to update");
         }
   

@@ -3,9 +3,11 @@ import { dbConnect } from '../../../../lib/dbConnect';
 import DataStructure from '../../../../models/DataStructure';
 import { validateEntity } from '../../../../lib/validation';
 import { getWebSocketManager } from '../../../../lib/websocketServer';
+import { getCurrentUser } from '../../../../lib/auth'; // Make sure this import exists
 
+// GET /api/entities/:id
 export async function GET(req, context) {
-  const { id } = await context.params;
+  const { id } = await context.params; // ✅ Awaited
 
   await dbConnect();
 
@@ -21,17 +23,20 @@ export async function GET(req, context) {
 
     const entityObject = entity.toObject();
     entityObject.id = entity._id;
+
     return NextResponse.json(entityObject);
   } catch (err) {
     console.error("GET error:", err);
-    return NextResponse.json({ error: "Error fetching entity" }, { status: 500 });
+    return NextResponse.json({ error: err.message || "Error fetching entity" }, { status: 500 });
   }
 }
 
-export async function PATCH(req, { params }) {
+// PATCH /api/entities/:id
+export async function PATCH(req, context) {
   try {
     await dbConnect();
-    const { id } = params;
+
+    const { id } = await context.params; // ✅ Awaited
     const updates = await req.json();
     const wsManager = getWebSocketManager();
 
@@ -44,8 +49,9 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
     }
 
-    const currentUser = await getCurrentUser(req); 
-    if (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()) {
+    const currentUser = await getCurrentUser(req);
+    if (!entity.createdBy || !currentUser?._id ||
+        (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -65,14 +71,16 @@ export async function PATCH(req, { params }) {
 
     return NextResponse.json(updated, { status: 200 });
   } catch (err) {
-    return NextResponse.json({ error: "Error updating entity" }, { status: 500 });
+    console.error("PATCH error:", err);
+    return NextResponse.json({ error: err.message || "Error updating entity" }, { status: 500 });
   }
 }
 
-export async function DELETE(req, { params }) {
+// DELETE /api/entities/:id
+export async function DELETE(req, context) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await context.params; // ✅ Awaited
     const wsManager = getWebSocketManager();
 
     if (!id || id === "undefined") {
@@ -84,7 +92,7 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
     }
 
-    const currentUser = await getCurrentUser(req); 
+    const currentUser = await getCurrentUser(req);
     if (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
@@ -97,7 +105,7 @@ export async function DELETE(req, { params }) {
 
     return NextResponse.json({ message: 'Deleted successfully' }, { status: 200 });
   } catch (err) {
-    return NextResponse.json({ error: "Error deleting entity" }, { status: 500 });
+    console.error("DELETE error:", err);
+    return NextResponse.json({ error: err.message || "Error deleting entity" }, { status: 500 });
   }
 }
-

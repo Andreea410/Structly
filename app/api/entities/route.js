@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { dbConnect } from "../../../lib/dbConnect";
 import DataStructure from "/models/DataStructure";
 import { getCurrentUser } from '../../../lib/auth'; 
+import { validateEntity } from '../../../lib/validation';
 
 export async function GET(req) {
   try {
@@ -72,17 +73,5 @@ export async function POST(req) {
   }
 }
 
-function validateEntity(entity) {
-  const errors = [];
-
-  if (!entity.title || entity.title.trim() === "") {
-    errors.push("Title is required.");
-  }
-
-  if (!entity.description || entity.description.trim() === "") {
-    errors.push("Description is required.");
-  }
-  return errors;
-}
 
 
