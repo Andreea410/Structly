@@ -121,8 +121,6 @@ export default function DataStructurePage() {
     }
   };
   
-
-
   const handleBack = () => {
     router.push("/");
   };

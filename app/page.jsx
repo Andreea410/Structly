@@ -412,11 +412,6 @@ export default function HomePage() {
           <NavItem text="Leaderboard" />
           <NavItem text="Favorites" />
           {isAdmin && (
-            <Link href="/logs">
-              <NavItem text="View Logs" />
-            </Link>
-          )}
-          {isAdmin && (
             <>
               <Link href="/logs">
                 <NavItem text="View Logs" />

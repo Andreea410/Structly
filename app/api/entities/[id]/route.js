@@ -51,8 +51,7 @@ export async function GET(req, context) {
 export async function PATCH(req, context) {
   try {
     await dbConnect();
-
-    const { id } = await context.params;
+    const { id } = context.params;
     const updates = await req.json();
     const wsManager = getWebSocketManager();
 
@@ -74,9 +73,8 @@ export async function PATCH(req, context) {
         (!entity.createdBy || (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()))
       )
     ) {
-          return NextResponse.json({ error: "You are not allowed to modify this data structure." }, { status: 403 });
+      return NextResponse.json({ error: "You are not allowed to modify this data structure." }, { status: 403 });
     }
-
 
     if (!isOnlyUsageUpdate) {
       const errors = validateEntity(updates);
@@ -84,8 +82,8 @@ export async function PATCH(req, context) {
         return NextResponse.json({ errors }, { status: 400 });
       }
     }
-    
 
+    // ✅ Only now update the DB:
     const updated = await DataStructure.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true
@@ -108,6 +106,7 @@ export async function PATCH(req, context) {
     return NextResponse.json({ error: err.message || "Error updating entity" }, { status: 500 });
   }
 }
+
 
 // DELETE /api/entities/:id
 export async function DELETE(req, context) {
