@@ -3,6 +3,7 @@ import { dbConnect } from "../../../lib/dbConnect";
 import DataStructure from "/models/DataStructure";
 import { getCurrentUser } from '../../../lib/auth'; 
 import { validateEntity } from '../../../lib/validation';
+import { logAction } from '../../../../lib/logger'; // ✅ Add this
 
 export async function GET(req) {
   try {
@@ -42,6 +43,20 @@ export async function GET(req) {
       .skip(skip)
       .limit(limit);
 
+      try {
+        const currentUser = await getCurrentUser(req);
+        for (const entity of entities) {
+          await logAction({
+            userId: currentUser._id,
+            action: "READ",
+            entity: "DataStructure",
+            entityId: entity._id
+          });
+        }
+      } catch (_) {
+        
+      }
+
     return NextResponse.json(entities, { status: 200 });
   } catch (err) {
     console.error("GET /entities error:", err);
@@ -66,6 +81,14 @@ export async function POST(req) {
     }
 
     const created = await DataStructure.create(entityData);
+
+    await logAction({
+      userId: currentUser._id,
+      action: "CREATE",
+      entity: "DataStructure",
+      entityId: created._id
+    });
+
     return NextResponse.json(created, { status: 201 });
   } catch (err) {
     console.error("POST /entities error:", err);

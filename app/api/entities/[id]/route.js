@@ -4,6 +4,7 @@ import DataStructure from '../../../../models/DataStructure';
 import { validateEntity } from '../../../../lib/validation';
 import { getWebSocketManager } from '../../../../lib/websocketServer';
 import { getCurrentUser } from '../../../../lib/auth'; // Make sure this import exists
+import { logAction } from '../../../../lib/logger'; // ✅ Add this
 
 // GET /api/entities/:id
 export async function GET(req, context) {
@@ -23,6 +24,13 @@ export async function GET(req, context) {
 
     const entityObject = entity.toObject();
     entityObject.id = entity._id;
+
+    await logAction({
+      userId: currentUser?._id || null,
+      action: "READ",
+      entity: "DataStructure",
+      entityId: entity._id
+    });
 
     return NextResponse.json(entityObject);
   } catch (err) {
@@ -71,6 +79,13 @@ export async function PATCH(req, context) {
       wsManager.broadcast({ type: 'ENTITY_UPDATED', data: updated });
     }
 
+    await logAction({
+      userId: currentUser._id,
+      action: "UPDATE",
+      entity: "DataStructure",
+      entityId: updated._id
+    });    
+
     return NextResponse.json(updated, { status: 200 });
   } catch (err) {
     console.error("PATCH error:", err);
@@ -105,6 +120,13 @@ export async function DELETE(req, context) {
       wsManager.broadcast({ type: 'ENTITY_DELETED', data: { id } });
     }
 
+    await logAction({
+      userId: currentUser._id,
+      action: "DELETE",
+      entity: "DataStructure",
+      entityId: entity._id
+    });
+    
     return NextResponse.json({ message: 'Deleted successfully' }, { status: 200 });
   } catch (err) {
     console.error("DELETE error:", err);
