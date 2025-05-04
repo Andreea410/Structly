@@ -6,10 +6,27 @@ export default function LogsPage() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    fetch("/api/logs")
-      .then((res) => res.json())
-      .then((data) => setLogs(data))
-      .catch((err) => console.error("Failed to fetch logs", err));
+    const fetchLogs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("/api/logs", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Failed to fetch logs");
+        }
+  
+        const data = await res.json();
+        setLogs(data);
+      } catch (err) {
+        console.error("Fetch logs error:", err.message);
+        setError("Could not load logs. Make sure you're an admin and logged in.");
+      }
+    };
+  
+    fetchLogs();
   }, []);
 
   return (

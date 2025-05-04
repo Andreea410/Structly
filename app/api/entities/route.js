@@ -3,7 +3,7 @@ import { dbConnect } from "../../../lib/dbConnect";
 import DataStructure from "/models/DataStructure";
 import { getCurrentUser } from '../../../lib/auth'; 
 import { validateEntity } from '../../../lib/validation';
-import { logAction } from '../../../../lib/logger'; // ✅ Add this
+import { logAction } from '../../../lib/logger'; 
 
 export async function GET(req) {
   try {

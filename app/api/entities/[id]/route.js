@@ -3,8 +3,8 @@ import { dbConnect } from '../../../../lib/dbConnect';
 import DataStructure from '../../../../models/DataStructure';
 import { validateEntity } from '../../../../lib/validation';
 import { getWebSocketManager } from '../../../../lib/websocketServer';
-import { getCurrentUser } from '../../../../lib/auth'; // Make sure this import exists
-import { logAction } from '../../../../lib/logger'; // ✅ Add this
+import { getCurrentUser } from '../../../../lib/auth'; 
+import { logAction } from '../../../../lib/logger'; 
 
 // GET /api/entities/:id
 export async function GET(req, context) {
@@ -25,13 +25,21 @@ export async function GET(req, context) {
     const entityObject = entity.toObject();
     entityObject.id = entity._id;
 
-    await logAction({
-      userId: currentUser?._id || null,
-      action: "READ",
-      entity: "DataStructure",
-      entityId: entity._id
-    });
+    let currentUser = null;
+    try {
+      currentUser = await getCurrentUser(req);
+    } catch (e) {
+    }
 
+    if (currentUser) {
+      await logAction({
+        userId: currentUser._id,
+        action: "READ",
+        entity: "DataStructure",
+        entityId: entity._id,
+      });
+    }
+    
     return NextResponse.json(entityObject);
   } catch (err) {
     console.error("GET error:", err);
