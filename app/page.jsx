@@ -302,12 +302,17 @@ export default function HomePage() {
     }
   
     try {
+      const token = localStorage.getItem("token");
+
       await fetch(`/api/entities/${item.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedItem),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ usageCount: updatedItem.usageCount }),
       });
-  
+
       router.push(`/data-structure/${item.id}`);
     } catch (err) {
       console.error("View error:", err);

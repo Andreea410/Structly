@@ -39,7 +39,7 @@ export async function GET(req, context) {
         entityId: entity._id,
       });
     }
-    
+
     return NextResponse.json(entityObject);
   } catch (err) {
     console.error("GET error:", err);
@@ -68,15 +68,23 @@ export async function PATCH(req, context) {
     const currentUser = await getCurrentUser(req);
     const isOnlyUsageUpdate = Object.keys(updates).length === 1 && typeof updates.usageCount === "number";
 
-    if (!isOnlyUsageUpdate && !entity.createdBy || !currentUser?._id ||
-        (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString())) {
+    if (
+      !currentUser?._id ||
+      (!isOnlyUsageUpdate &&
+        (!entity.createdBy || (currentUser.role !== "admin" && entity.createdBy.toString() !== currentUser._id.toString()))
+      )
+    ) {
           return NextResponse.json({ error: "You are not allowed to modify this data structure." }, { status: 403 });
     }
 
-    const errors = validateEntity(updates);
-    if (errors.length) {
-      return NextResponse.json({ errors }, { status: 400 });
+
+    if (!isOnlyUsageUpdate) {
+      const errors = validateEntity(updates);
+      if (errors.length) {
+        return NextResponse.json({ errors }, { status: 400 });
+      }
     }
+    
 
     const updated = await DataStructure.findByIdAndUpdate(id, updates, {
       new: true,
