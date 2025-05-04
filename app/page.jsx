@@ -388,7 +388,13 @@ export default function HomePage() {
             <Link href="/logs">
               <NavItem text="View Logs" />
             </Link>
-        )}
+          )}
+          {isAdmin && (
+            <Link href="/monitored-users">
+              <NavItem text="Suspicious Users" />
+            </Link>
+          )}
+
 
         </nav>
 

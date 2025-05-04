@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '../../../lib/dbConnect';
 import MonitoredUser from '../../../models/monitoredUser';
-import User from '../../../models/User';
 import { getCurrentUser } from '../../../lib/auth';
 
 export async function GET(req) {
