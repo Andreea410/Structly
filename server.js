@@ -2,13 +2,14 @@ import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
 import { generateFakeDataStructures } from "./utils/generateFakeData.js";
+import { monitorLogs } from "./lib/monitorLogs.js";
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
 let interval;
-let sendingEnabled = false; // Control flag
+let sendingEnabled = false;
 
 app.prepare().then(() => {
   const server = createServer((req, res) => {
@@ -39,8 +40,14 @@ app.prepare().then(() => {
     });
   });
 
+  setInterval(() => {
+    monitorLogs().catch((err) => {
+      console.error("Monitoring error:", err);
+    });
+  }, 60000);
+
   const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+  server.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
 });
