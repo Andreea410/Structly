@@ -26,6 +26,7 @@ export default function HomePage() {
   const limit = 5;
   const { socket, isConnected } = useSocket();
   const { networkOnline, serverOnline } = useNetworkStatus();
+  const [isAdmin, setIsAdmin] = useState(false);
   const observer = useRef();
   const [statistics, setStatistics] = useState({
 
@@ -90,6 +91,15 @@ export default function HomePage() {
       });
     }
   }, [networkOnline, serverOnline]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setIsAdmin(payload.role === "admin");
+    }
+  }, []);
+  
 
   useEffect(() => {
     if (!isClient) return;
@@ -349,6 +359,12 @@ export default function HomePage() {
           <NavItem text="Profile" />
           <NavItem text="Leaderboard" />
           <NavItem text="Favorites" />
+          {isAdmin && (
+            <Link href="/logs">
+              <NavItem text="View Logs" />
+            </Link>
+        )}
+
         </nav>
 
         <div className="mt-10 space-y-3">
