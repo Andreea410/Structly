@@ -24,6 +24,7 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true);
   const [sortOption, setSortOption] = useState("default");
   const limit = 5;
+  const [currentUser, setCurrentUser] = useState(null);
   const { socket, isConnected } = useSocket();
   const { networkOnline, serverOnline } = useNetworkStatus();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -93,12 +94,25 @@ export default function HomePage() {
   }, [networkOnline, serverOnline]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setIsAdmin(payload.role === "admin");
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+  
+      const base64Payload = token.split(".")[1];
+      if (!base64Payload) return;
+  
+      const jsonPayload = JSON.parse(atob(base64Payload));
+      setCurrentUser(jsonPayload);
+      if (jsonPayload?.role === "admin") {
+        setIsAdmin(true);
+      }
+    } catch (err) {
+      console.warn("Invalid token format or Base64 decode failed:", err);
+      setCurrentUser(null);
+      setIsAdmin(false);
     }
   }, []);
+  
   
 
   useEffect(() => {
@@ -333,7 +347,13 @@ export default function HomePage() {
     }
   };
   
-
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setCurrentUser(null);
+    setIsAdmin(false);
+    router.push("/login");
+  };
+  
   const handleAddDataStructure = () => router.push("/add-data-structure");
 
   if (!isClient) return <LoadingSkeleton />;
@@ -375,7 +395,7 @@ export default function HomePage() {
           <NavItem text="Sign Up" />
         </Link>
           <NavItem text="Settings" />
-          <NavItem text="Log Out" />
+          <NavItem text="Log Out" onClick={handleLogout} />
         </div>
 
         <div className="mt-16 p-4 bg-purple-800/30 rounded-lg">
@@ -393,6 +413,18 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto">
+      <div className="flex justify-end mb-4">
+        <div className="bg-white rounded-lg shadow px-4 py-2 text-sm text-gray-700">
+          {currentUser ? (
+            <span>
+              Logged in as <strong>{currentUser.email}</strong> ({currentUser.role})
+            </span>
+          ) : (
+            <span>You are not logged in.</span>
+          )}
+        </div>
+      </div>
+        
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <StatCard
@@ -695,9 +727,11 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   );
 }
 
-function NavItem({ text, icon, active }) {
+function NavItem({ text, icon, active, onClick }) {
   return (
-    <div className={`flex items-center space-x-3 p-3 rounded-lg transition-all cursor-pointer ${
+    <div 
+    onClick={onClick}
+    className={`flex items-center space-x-3 p-3 rounded-lg transition-all cursor-pointer ${
       active
         ? "bg-purple-600/20 text-white font-medium"
         : "text-purple-200 hover:bg-purple-800/30"

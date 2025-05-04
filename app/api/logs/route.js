@@ -11,6 +11,8 @@ export async function GET(req) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const logs = await LogEntry.find().sort({ timestamp: -1 }).populate("user", "email");
+  const logs = await LogEntry.find()
+  .sort({ timestamp: -1 })
+  .populate("userId", "email");
   return NextResponse.json(logs);
 }

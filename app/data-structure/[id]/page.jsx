@@ -91,17 +91,36 @@ export default function DataStructurePage() {
   };
   
 
-const handleDelete = async () => {
-  const res = await fetch(`/api/entities/${dataStructure._id}`, {
-    method: "DELETE",
-  });
-
-  if (res.ok) {
-    router.push("/");
-  } else {
-    alert("Failed to delete.");
-  }
-};
+  const handleDelete = async () => {
+    const confirmDelete = confirm("Are you sure you want to delete this data structure?");
+    if (!confirmDelete) return;
+  
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to delete this data structure.");
+      return;
+    }
+  
+    try {
+      const res = await fetch(`/api/entities/${dataStructure._id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (res.ok) {
+        router.push("/");
+      } else {
+        const { error } = await res.json().catch(() => ({ error: "Unknown error" }));
+        alert("Delete failed: " + error);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Delete failed. Check console.");
+    }
+  };
+  
 
 
   const handleBack = () => {

@@ -44,7 +44,7 @@ export default function LogsPage() {
         <tbody>
           {logs.map((log) => (
             <tr key={log._id}>
-              <td className="p-3 border">{log.user?.email || "Unknown"}</td>
+              <td className="p-3 border">{log.userId?.email || "Unknown"}</td>
               <td className="p-3 border">{log.action}</td>
               <td className="p-3 border">{log.entityId}</td>
               <td className="p-3 border">{new Date(log.timestamp).toLocaleString()}</td>
