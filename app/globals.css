@@ -1,0 +1,45 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+:root {
+  --primary: 124, 58, 237;
+  --secondary: 139, 92, 246;
+}
+
+body {
+  background-color: #f9fafb;
+}
+
+.btn-primary {
+  @apply px-4 py-2 bg-purple-600 text-white rounded-lg transition-colors;
+}
+
+.btn-primary:hover {
+  @apply bg-purple-700;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-white text-purple-600 border border-purple-200 rounded-lg transition-colors;
+}
+
+.btn-secondary:hover {
+  @apply bg-gray-100;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 
