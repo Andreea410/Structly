@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -12,21 +14,30 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    setError("");
+    setIsLoading(true);
 
-    if (res.ok) {
-      router.push("/"); 
-    } else {
-      alert("Invalid email or password");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      localStorage.setItem("token", data.token);
+      router.push("/");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.message || "Failed to login. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    const data = await res.json();
-    localStorage.setItem("token", data.token); 
-    router.push("/");
   };
 
   return (
@@ -38,6 +49,11 @@ export default function LoginPage() {
         </div>
         <div className="w-1/2 bg-white p-12 flex flex-col justify-center">
           <h2 className="text-2xl font-bold text-purple-700 mb-4">Log In</h2>
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-600 rounded-lg">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               name="email"
@@ -47,6 +63,7 @@ export default function LoginPage() {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg"
               required
+              autoComplete="username"
             />
             <input
               name="password"
@@ -56,12 +73,14 @@ export default function LoginPage() {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg"
               required
+              autoComplete="current-password"
             />
             <button
               type="submit"
-              className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              disabled={isLoading}
+              className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
             >
-              Log In
+              {isLoading ? "Logging in..." : "Log In"}
             </button>
             <p className="text-sm text-gray-500 text-center">
               Don't have an account?{" "}

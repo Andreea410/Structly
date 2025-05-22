@@ -1,7 +1,7 @@
 import "./loadEnv.js"; 
 import { createServer } from "http";
 import next from "next";
-import { Server } from "socket.io";
+import { getWebSocketManager } from "./lib/websocket.js";
 import { generateFakeDataStructures } from "./utils/generateFakeData.js";
 import { monitorLogs } from "./lib/monitorLogs.js";
 
@@ -17,7 +17,9 @@ app.prepare().then(() => {
     handle(req, res);
   });
 
-  const io = new Server(server);
+  // Initialize WebSocket
+  const wsManager = getWebSocketManager();
+  const io = wsManager.initialize(server);
 
   io.on("connection", (socket) => {
     console.log("Client connected");
@@ -32,7 +34,7 @@ app.prepare().then(() => {
         if (!sendingEnabled) return;
 
         const entity = generateFakeDataStructures(100)[0];
-        io.emit("NEW_ENTITY", entity);
+        wsManager.broadcast("NEW_ENTITY", entity);
       }, 10000);
     }
 
