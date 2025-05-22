@@ -7,7 +7,15 @@ export default function useSocket() {
 
   const connect = () => {
     if (!socketRef.current || !socketRef.current.connected) {
-      socketRef.current = io();
+      socketRef.current = io({
+        path: "/api/socketio",
+        addTrailingSlash: false,
+        transports: ["websocket", "polling"],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000,
+      });
 
       socketRef.current.on("connect", () => {
         setIsConnected(true);
@@ -17,6 +25,11 @@ export default function useSocket() {
       socketRef.current.on("disconnect", () => {
         setIsConnected(false);
         console.log("Socket disconnected");
+      });
+
+      socketRef.current.on("connect_error", (error) => {
+        console.log("Socket connection error:", error);
+        setIsConnected(false);
       });
     }
   };
@@ -33,7 +46,9 @@ export default function useSocket() {
   useEffect(() => {
     connect(); // remove this line if you only want manual control
     return () => {
-      
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
     };
   }, []);
 
