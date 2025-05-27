@@ -30,7 +30,23 @@ export default function LoginPage() {
         throw new Error(data.error || "Login failed");
       }
 
+      // Validate token format
+      if (!data.token || typeof data.token !== 'string') {
+        throw new Error("Invalid token received from server");
+      }
+
+      // Clear any existing token
+      localStorage.removeItem("token");
+      
+      // Store the new token
       localStorage.setItem("token", data.token);
+      
+      // Verify the token was stored correctly
+      const storedToken = localStorage.getItem("token");
+      if (storedToken !== data.token) {
+        throw new Error("Failed to store token properly");
+      }
+
       router.push("/");
     } catch (err) {
       console.error("Login error:", err);
