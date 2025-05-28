@@ -1,10 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", username: "", password: "" });
+
+  useEffect(() => {
+    // If token exists, redirect to home
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.replace("/");
+    }
+  }, [router]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
