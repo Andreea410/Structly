@@ -4,6 +4,7 @@ import qrcode from 'qrcode';
 const User = require('../../../../../models/User');
 import { dbConnect } from '../../../../../lib/dbConnect';
 import { getCurrentUser } from '../../../../../lib/auth';
+import jwt from 'jsonwebtoken';
 
 export async function POST(req) {
   await dbConnect();
@@ -18,5 +19,14 @@ export async function POST(req) {
   currentUser.isTwoFAEnabled = true;
   await currentUser.save();
 
-  return NextResponse.json({ qr, secret: secret.base32 });
+  // Generate new JWT token with updated 2FA status
+  const payload = {
+    id: currentUser._id,
+    email: currentUser.email,
+    role: currentUser.role,
+    isTwoFAEnabled: true
+  };
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+  return NextResponse.json({ qr, secret: secret.base32, token });
 } 

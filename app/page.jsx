@@ -409,6 +409,11 @@ export default function HomePage() {
       setQrCode(data.qr);
       setSecret(data.secret);
       setShow2FASetup(true);
+      
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        setIs2FAEnabled(true);
+      }
     } catch (err) {
       console.error("2FA setup error:", err);
     }
@@ -421,9 +426,13 @@ export default function HomePage() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      const data = await res.json();
       if (res.ok) {
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
         setIs2FAEnabled(false);
-        handleLogout(); // Log out after disabling 2FA
+        handleLogout();
       }
     } catch (err) {
       console.error("2FA disable error:", err);
