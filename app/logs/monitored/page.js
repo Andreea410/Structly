@@ -40,9 +40,8 @@ export default function MonitoredUsersPage() {
         <ul className="space-y-4">
           {users.map((user) => (
             <li key={user._id} className="border p-4 rounded-lg shadow">
-              <p><strong>Email:</strong> {user.userId?.email || "Unknown"}</p>
-              <p><strong>Reason:</strong> {user.reason}</p>
-              <p><strong>Detected:</strong> {new Date(user.detectedAt).toLocaleString()}</p>
+              <p><strong>Email:</strong> {user.email || "Unknown"}</p>
+              <p><strong>Detected:</strong> {user.detectedAt && user.detectedAt !== 'Unknown' ? new Date(user.detectedAt).toLocaleString() : 'Unknown'}</p>
             </li>
           ))}
         </ul>

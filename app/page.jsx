@@ -126,7 +126,9 @@ export default function HomePage() {
   
       try {
         const url = `/api/entities?page=1&limit=${limit}&search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
-        const res = await fetch(url);
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(url, { headers });
         if (!res.ok) throw new Error("Failed to fetch data");
   
         const newData = await res.json();
@@ -165,7 +167,9 @@ export default function HomePage() {
   
     try {
       const url = `/api/entities?page=${pageToFetch}&limit=${limit}&search=${encodeURIComponent(searchQuery)}&sort=${sortOption}`;
-      const res = await fetch(url);
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(url, { headers });
       if (!res.ok) throw new Error("Failed to fetch data");
   
       const newData = await res.json();

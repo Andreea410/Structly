@@ -20,7 +20,9 @@ export default function DataStructurePage() {
   
       try {
         setLoading(true);
-        const res = await fetch(`/api/entities/${id}`);
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`/api/entities/${id}`, { headers });
         if (res.ok) {
           const data = await res.json();
           setDataStructure(data);

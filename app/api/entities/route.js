@@ -47,7 +47,7 @@ export async function GET(req) {
         const currentUser = await getCurrentUser(req);
         for (const entity of entities) {
           await logAction({
-            userId: currentUser._id,
+            userId: String(currentUser._id),
             action: "READ",
             entity: "DataStructure",
             entityId: entity._id
@@ -83,7 +83,7 @@ export async function POST(req) {
     const created = await DataStructure.create(entityData);
 
     await logAction({
-      userId: currentUser._id,
+      userId: String(currentUser._id),
       action: "CREATE",
       entity: "DataStructure",
       entityId: created._id

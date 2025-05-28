@@ -7,16 +7,16 @@ import { getCurrentUser } from '../../../../lib/auth';
 import { logAction } from '../../../../lib/logger'; 
 
 // GET /api/entities/:id
-export async function GET(req, context) {
-  const { id } = await context.params;
-
-  await dbConnect();
-
-  if (!id || id === "undefined") {
-    return NextResponse.json({ error: "Missing ID" }, { status: 400 });
-  }
-
+export async function GET(req, { params }) {
   try {
+    const id = await params.id;
+
+    await dbConnect();
+
+    if (!id || id === "undefined") {
+      return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+    }
+
     const entity = await DataStructure.findById(id).populate("comments");
     if (!entity) {
       return NextResponse.json({ error: "Entity not found" }, { status: 404 });
@@ -33,7 +33,7 @@ export async function GET(req, context) {
 
     if (currentUser) {
       await logAction({
-        userId: currentUser._id,
+        userId: String(currentUser._id),
         action: "READ",
         entity: "DataStructure",
         entityId: entity._id,
@@ -48,10 +48,10 @@ export async function GET(req, context) {
 }
 
 // PATCH /api/entities/:id
-export async function PATCH(req, context) {
+export async function PATCH(req, { params }) {
   try {
+    const id = await params.id;
     await dbConnect();
-    const { id } = context.params;
     const updates = await req.json();
     const wsManager = getWebSocketManager();
 
@@ -93,7 +93,7 @@ export async function PATCH(req, context) {
     }
 
     await logAction({
-      userId: currentUser._id,
+      userId: String(currentUser._id),
       action: "UPDATE",
       entity: "DataStructure",
       entityId: updated._id
@@ -108,10 +108,10 @@ export async function PATCH(req, context) {
 
 
 // DELETE /api/entities/:id
-export async function DELETE(req, context) {
+export async function DELETE(req, { params }) {
   try {
+    const id = await params.id;
     await dbConnect();
-    const { id } = await context.params;
     const wsManager = getWebSocketManager();
 
     if (!id || id === "undefined") {
@@ -135,7 +135,7 @@ export async function DELETE(req, context) {
     }
 
     await logAction({
-      userId: currentUser._id,
+      userId: String(currentUser._id),
       action: "DELETE",
       entity: "DataStructure",
       entityId: entity._id

@@ -1,9 +1,16 @@
-import "./loadEnv.js"; 
-import { createServer } from "http";
-import next from "next";
-import { getWebSocketManager } from "./lib/websocket.js";
-import { generateFakeDataStructures } from "./utils/generateFakeData.js";
-import { monitorLogs } from "./lib/monitorLogs.js";
+require('./loadEnv.js');
+
+const { createServer } = require("http");
+const next = require("next");
+const { getWebSocketManager } = require("./lib/websocket.js");
+const { generateFakeDataStructures } = require("./utils/generateFakeData.js");
+const { monitorLogs } = require("./lib/monitorLogs.js");
+
+// Verify environment variables
+if (!process.env.JWT_SECRET) {
+  console.error("JWT_SECRET is not set in environment variables!");
+  process.exit(1);
+}
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });

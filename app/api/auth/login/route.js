@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import User from '../../../../models/User';
-import { dbConnect } from '../../../../lib/dbConnect';
+const { NextResponse } = require('next/server');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../../../../models/User');
+const { dbConnect } = require('../../../../lib/dbConnect');
 
-export async function POST(req) {
+async function POST(req) {
   try {
     await dbConnect();
 
@@ -42,6 +42,8 @@ export async function POST(req) {
       );
     }
 
+    console.log('Signing token with secret:', secret ? 'Set' : 'Not set');
+
     const payload = {
       id: user._id,
       email: user.email,
@@ -59,3 +61,5 @@ export async function POST(req) {
     );
   }
 }
+
+module.exports = { POST };

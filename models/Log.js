@@ -1,5 +1,5 @@
 // models/Log.js
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const logSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -9,4 +9,4 @@ const logSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.Log || mongoose.model("Log", logSchema);
+module.exports = mongoose.models.Log || mongoose.model("Log", logSchema);

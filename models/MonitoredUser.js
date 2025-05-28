@@ -1,5 +1,5 @@
 // models/monitoredUser.js
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const monitoredUserSchema = new mongoose.Schema({
   userId: {
@@ -28,4 +28,15 @@ const monitoredUserSchema = new mongoose.Schema({
 // Create a compound index to ensure uniqueness of userId + monitoredBy combination
 monitoredUserSchema.index({ userId: 1, monitoredBy: 1 }, { unique: true });
 
-export default mongoose.models.MonitoredUser || mongoose.model('MonitoredUser', monitoredUserSchema);
+monitoredUserSchema.pre('save', async function(next) {
+  const User = mongoose.models.User || require('./User');
+  const user = await User.findById(this.userId);
+  if (user && user.email && user.email.endsWith('@admin.com')) {
+    const err = new Error('Admins cannot be monitored');
+    err.name = 'AdminMonitorRestriction';
+    return next(err);
+  }
+  next();
+});
+
+module.exports = mongoose.models.MonitoredUser || mongoose.model('MonitoredUser', monitoredUserSchema);
