@@ -33,6 +33,11 @@ async function POST(req) {
       );
     }
 
+    if (user.isTwoFAEnabled) {
+      const show2FASetup = !user.twoFASecret;
+      return NextResponse.json({ require2FA: true, userId: user._id, show2FASetup }, { status: 200 });
+    }
+
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       console.error("JWT_SECRET is not set in environment variables");

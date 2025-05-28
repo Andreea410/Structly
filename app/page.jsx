@@ -25,6 +25,10 @@ export default function HomePage() {
   const [sortOption, setSortOption] = useState("default");
   const limit = 5;
   const [currentUser, setCurrentUser] = useState(null);
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [qrCode, setQrCode] = useState(null);
+  const [secret, setSecret] = useState(null);
   const { socket, isConnected } = useSocket();
   const { networkOnline, serverOnline } = useNetworkStatus();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -106,10 +110,12 @@ export default function HomePage() {
       if (jsonPayload?.role === "admin") {
         setIsAdmin(true);
       }
+      setIs2FAEnabled(jsonPayload.isTwoFAEnabled || false);
     } catch (err) {
       console.warn("Invalid token format or Base64 decode failed:", err);
       setCurrentUser(null);
       setIsAdmin(false);
+      setIs2FAEnabled(false);
     }
   }, []);
   
@@ -360,6 +366,7 @@ export default function HomePage() {
     localStorage.removeItem("token");
     setCurrentUser(null);
     setIsAdmin(false);
+    setIs2FAEnabled(false);
     router.push("/login");
   };
   
@@ -390,7 +397,38 @@ export default function HomePage() {
   
     alert(" Simulated 15 POST operations.");
   };
-  
+
+  const handle2FASetup = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/2fa/setup", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setQrCode(data.qr);
+      setSecret(data.secret);
+      setShow2FASetup(true);
+    } catch (err) {
+      console.error("2FA setup error:", err);
+    }
+  };
+
+  const handle2FADisable = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/2fa/disable", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setIs2FAEnabled(false);
+        handleLogout(); // Log out after disabling 2FA
+      }
+    } catch (err) {
+      console.error("2FA disable error:", err);
+    }
+  };
 
   if (!isClient) return <LoadingSkeleton />;
 
@@ -437,6 +475,46 @@ export default function HomePage() {
           <NavItem text="Settings" />
           <NavItem text="Log Out" onClick={handleLogout} />
         </div>
+
+        {currentUser && (
+          <div className="mt-6 p-4 bg-purple-800/30 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3">Two-Factor Authentication</h3>
+            {!is2FAEnabled ? (
+              <button
+                onClick={handle2FASetup}
+                className="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
+              >
+                Enable 2FA
+              </button>
+            ) : (
+              <button
+                onClick={handle2FADisable}
+                className="w-full py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+              >
+                Disable 2FA
+              </button>
+            )}
+            {show2FASetup && qrCode && (
+              <div className="mt-4 p-4 bg-white/10 rounded-lg">
+                <p className="text-sm mb-2">Scan this QR code with your authenticator app:</p>
+                <img src={qrCode} alt="2FA QR Code" className="w-full mb-2" />
+                <p className="text-xs text-purple-200 mb-2">Or enter this secret manually:</p>
+                <code className="block p-2 bg-purple-900/50 rounded text-sm font-mono text-purple-100 break-all">
+                  {secret}
+                </code>
+                <button
+                  onClick={() => {
+                    setShow2FASetup(false);
+                    handleLogout();
+                  }}
+                  className="mt-3 w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-16 p-4 bg-purple-800/30 rounded-lg">
           <p className="text-sm text-purple-200">Need help?</p>
