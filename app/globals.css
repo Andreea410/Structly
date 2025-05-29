@@ -26,7 +26,6 @@ body {
   @apply bg-gray-100;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
