@@ -46,28 +46,25 @@ export default function UsageChart({ dataStructures }) {
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-sm mb-8">
-      <h3 className="text-lg font-semibold text-purple-800 mb-4">
-        Real-Time Usage
-        <span className="ml-2 text-sm font-normal text-gray-500">
-          {dataStructures.length} items
-        </span>
-      </h3>
-      <Line 
+  <div className="p-6 bg-white rounded-xl shadow-sm mb-8">
+    <h3 className="text-lg font-semibold text-purple-800 mb-4">
+      Real-Time Usage
+      <span className="ml-2 text-sm font-normal text-gray-500">
+        {dataStructures.length} items
+      </span>
+    </h3>
+    <div className="h-64">
+      <Line
         ref={chartRef}
-        data={chartData} 
+        data={chartData}
         options={{
           responsive: true,
-          animation: {
-            duration: 1000,
-          },
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }} 
+          maintainAspectRatio: false,
+          animation: { duration: 1000 },
+          scales: { y: { beginAtZero: true } }
+        }}
       />
     </div>
+  </div>
   );
 }
