@@ -46,14 +46,16 @@ export default function UsageChart({ dataStructures }) {
   };
 
   return (
-  <div className="p-6 bg-white rounded-xl shadow-sm mb-8">
-    <h3 className="text-lg font-semibold text-purple-800 mb-4">
-      Real-Time Usage
-      <span className="ml-2 text-sm font-normal text-gray-500">
+  <div className="w-full">
+    <div className="flex items-center mb-2">
+      <h3 className="text-xl font-semibold text-purple-800">
+        Real-Time Usage
+      </h3>
+      <span className="ml-3 text-base font-normal text-gray-500">
         {dataStructures.length} items
       </span>
-    </h3>
-    <div className="h-64">
+    </div>
+    <div className="h-96 w-full">
       <Line
         ref={chartRef}
         data={chartData}
